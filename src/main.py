@@ -31,6 +31,11 @@ def sinfo() -> dict:
                     'idle': 0,
                     'other': 0,
                     'total': 0
+                },
+                'memory': {
+                    'allocated': 0,
+                    'free': 0,
+                    'total': 0
                 }
             },
             'a100gpu': {
@@ -38,6 +43,16 @@ def sinfo() -> dict:
                     'allocated': 0,
                     'idle': 0,
                     'other': 0,
+                    'total': 0
+                },
+                'memory': {
+                    'allocated': 0,
+                    'free': 0,
+                    'total': 0
+                },
+                'gpus': {
+                    'allocated': 0,
+                    'free': 0,
                     'total': 0
                 }
             },
@@ -47,6 +62,16 @@ def sinfo() -> dict:
                     'idle': 0,
                     'other': 0,
                     'total': 0
+                },
+                'memory': {
+                    'allocated': 0,
+                    'free': 0,
+                    'total': 0
+                },
+                'gpus': {
+                    'allocated': 0,
+                    'free': 0,
+                    'total': 0
                 }
             },
             'himem': {
@@ -54,6 +79,11 @@ def sinfo() -> dict:
                     'allocated': 0,
                     'idle': 0,
                     'other': 0,
+                    'total': 0
+                },
+                'memory': {
+                    'allocated': 0,
+                    'free': 0,
                     'total': 0
                 }
             },
@@ -63,6 +93,11 @@ def sinfo() -> dict:
                     'idle': 0,
                     'other': 0,
                     'total': 0
+                },
+                'memory': {
+                    'allocated': 0,
+                    'free': 0,
+                    'total': 0
                 }
             },
             'gelifes': {
@@ -70,6 +105,11 @@ def sinfo() -> dict:
                     'allocated': 0,
                     'idle': 0,
                     'other': 0,
+                    'total': 0
+                },
+                'memory': {
+                    'allocated': 0,
+                    'free': 0,
                     'total': 0
                 }
             }
@@ -96,47 +136,21 @@ def sinfo() -> dict:
             elif node_list.startswith("gelifes"):
                 node_type = "gelifes"
             allocated_cpus, idle_cpus, other_cpus, total_cpus = cpu_state.split("/")
+            allocated_mem, free_mem, total_mem = int(alloc_mem), int(mem) - int(alloc_mem), int(mem)
             return_json["resources"][node_type]["cpus"]["allocated"] += int(allocated_cpus)
             return_json["resources"][node_type]["cpus"]["idle"] += int(idle_cpus)
             return_json["resources"][node_type]["cpus"]["other"] += int(other_cpus)
             return_json["resources"][node_type]["cpus"]["total"] += int(total_cpus)
-            # print(allocated_cpus)
-    # json_str = out.decode("utf-8")
-    # sinfo_json = json.loads(json_str)
-    # partitions = get_partitions(sinfo=sinfo_json)
-    # for partition in partitions:
-    #     allocated_cpus = 0
-    #     idle_cpus = 0
-    #     total_cpus = 0
-    #     return_json["resources"][partition] = {
-    #         "cpus": {
-    #             "allocated": 0,
-    #             "idle": 0,
-    #             "other": 0,
-    #             "total": 0
-    #         },
-    #         "memory": {
-    #             "allocated": 0,
-    #             "idle": 0,
-    #             "other": 0,
-    #             "total": 0
-    #         },
-    #     }
-    # for item in sinfo_json["sinfo"]:
-    #     if item["port"] == 0:
-    #         continue
-    #     partition = item["partition"]["name"]
-    #     if partition.startswith("gpu") or partition.startswith("gpu-"):
-    #         return_json["resources"][partition]['gpus'] = {
-    #             "allocated": 0,
-    #             "idle": 0,
-    #             "other": 0,
-    #             "total": 0
-    #         }
-    #     allocated_cpus = item["cpus"]["allocated"]
-    #     idle_cpus = item["cpus"]["idle"]
-    #     other_cpus = item["cpus"]["other"]
-    #     total_cpus = item["cpus"]["total"]
+            return_json["resources"][node_type]["memory"]["allocated"] += int(allocated_mem) * int(nodes)
+            return_json["resources"][node_type]["memory"]["free"] += int(free_mem) * int(nodes)
+            return_json["resources"][node_type]["memory"]["total"] += int(total_mem) * int(nodes)
+            if node_type in ["a100gpu", "v100gpu"]:
+                total_gpus = int(gres.split(":")[2][:1]) * int(nodes)
+                allocated_gpus = int(gres_used.split(":")[2][:1]) * int(nodes)
+                free_gpus = total_gpus - allocated_gpus
+                return_json["resources"][node_type]["gpus"]["allocated"] += int(allocated_gpus)
+                return_json["resources"][node_type]["gpus"]["free"] += int(free_gpus)
+                return_json["resources"][node_type]["gpus"]["total"] += int(total_gpus)
     return return_json
 
 
