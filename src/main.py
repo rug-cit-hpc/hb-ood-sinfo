@@ -61,8 +61,6 @@ def sinfo() -> dict:
 
 def main():
     sinfo_json = sinfo()
-    with open("sinfo.json", "w") as f:
-        json.dump(sinfo_json, f, indent=2)
     print(json.dumps(sinfo_json, indent=2))
 
 
